@@ -1,0 +1,89 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  @@map(name: "users")
+  id        Int      @id @default(autoincrement())
+  uuid      String   @default(uuid()) @unique
+  name      String
+  email     String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("update_at")
+  role      UserRole @default(USER)
+  likes     Like[]
+  posts     Post[]
+  comentarios Comentario[]
+}
+
+model Post {
+  id          Int      @id @default(autoincrement())
+  uuid        String   @default(uuid()) @unique
+  titulo      String
+  body        String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
+  comentarios Comentario[]
+  imagenes    Imagen[]
+}
+
+model Imagen {
+  id          Int      @id @default(autoincrement())
+  uuid        String   @default(uuid()) @unique
+  ruta        String
+  tipo        ImagenType 
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  postId      Int
+  post        Post     @relation(fields: [postId], references: [id])
+}
+
+model Comentario {
+  id        Int      @id @default(autoincrement())
+  uuid      String   @default(uuid()) @unique
+  texto     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  postId    Int
+  post      Post     @relation(fields: [postId], references: [id])
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Like {
+  id        Int        @id @default(autoincrement())
+  texto     String
+  tipo      LikeType? 
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  userId    Int
+  user      User       @relation(fields: [userId], references: [id])
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  ROOT
+}
+enum ImagenType {
+  HEADER
+  BODY
+  FOOTER
+}
+enum LikeType {
+  MEGUSTA
+  MEENCANTA
+  MEDIVIERTE
+  MEENOJA
+  MEENCORAZONA
+}
